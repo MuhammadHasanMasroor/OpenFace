@@ -24,12 +24,10 @@ endif()
 if ( ${OpenBLAS_INCLUDE_FOUND} )
     MESSAGE("  OpenBLAS_INCLUDE: ${OpenBLAS_INCLUDE_DIR}")
 else()
-    MESSAGE(WARNING "OpenBLAS include not found in the system. Using the one vended with OpenFace.")
-	set(OpenBLAS_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/lib/3rdParty/OpenBLAS/include")
-    MESSAGE("  OpenBLAS_INCLUDE: ${OpenBLAS_INCLUDE_DIR}")
+    MESSAGE(FATAL_ERROR "OpenBLAS include not found in the system. Please install libopenblas-dev.")
 endif()
 
-find_package( OpenCV 4.0 REQUIRED COMPONENTS core imgproc calib3d highgui objdetect)
+find_package( OpenCV 4.0 REQUIRED COMPONENTS core imgproc calib3d highgui objdetect videoio)
 if(${OpenCV_FOUND})
 	MESSAGE("OpenCV information:") 
 	MESSAGE("  OpenCV_INCLUDE_DIRS: ${OpenCV_INCLUDE_DIRS}") 
@@ -107,34 +105,6 @@ foreach(file ${files})
 	install(FILES ${file} DESTINATION ${CMAKE_CONFIG_DIR}/model/pdms)
 endforeach()
 
-# Move OpenCV classifiers
-file(GLOB files "lib/3rdParty/OpenCV3.4/classifiers/*.xml")
-foreach(file ${files})
-	file(COPY ${file} DESTINATION ${CMAKE_BINARY_DIR}/bin/classifiers)
-	install(FILES ${file} DESTINATION ${CMAKE_CONFIG_DIR}/classifiers)
-endforeach()
-
-# Move AU prediction modules
-file(GLOB files "lib/local/FaceAnalyser/AU_predictors/*.txt")
-foreach(file ${files})
-	file(COPY ${file} DESTINATION ${CMAKE_BINARY_DIR}/bin/AU_predictors)
-	install(FILES ${file} DESTINATION ${CMAKE_CONFIG_DIR}/AU_predictors)
-endforeach()
-
-# Move AU prediction modules
-file(GLOB files "lib/local/FaceAnalyser/AU_predictors/svr*")
-foreach(file ${files})
-	file(COPY ${file} DESTINATION ${CMAKE_BINARY_DIR}/bin/AU_predictors)
-	install(DIRECTORY ${file} DESTINATION ${CMAKE_CONFIG_DIR}/AU_predictors)
-endforeach()
-
-# Move AU prediction modules
-file(GLOB files "lib/local/FaceAnalyser/AU_predictors/svm*")
-foreach(file ${files})
-	file(COPY ${file} DESTINATION ${CMAKE_BINARY_DIR}/bin/AU_predictors)
-	install(DIRECTORY ${file} DESTINATION ${CMAKE_CONFIG_DIR}/AU_predictors)
-endforeach()
-
 if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
     execute_process(COMMAND ${CMAKE_CXX_COMPILER} -dumpversion OUTPUT_VARIABLE GCC_VERSION)
     if (GCC_VERSION VERSION_LESS 8.0)
@@ -164,8 +134,6 @@ endif()
 
 # LandmarkDetector library
 add_subdirectory(lib/local/LandmarkDetector)
-# Facial Expression analysis library
-add_subdirectory(lib/local/FaceAnalyser)
 # Gaze estimation library
 add_subdirectory(lib/local/GazeAnalyser)
 # Utilities library
@@ -240,8 +208,4 @@ if(CMAKE_CURRENT_SOURCE_DIR STREQUAL "${CMAKE_SOURCE_DIR}")
         DESTINATION ${CONFIG_DEST_DIR})
 endif()
 
-# executables
-add_subdirectory(exe/FaceLandmarkImg)
-add_subdirectory(exe/FaceLandmarkVid)
-add_subdirectory(exe/FaceLandmarkVidMulti)
-add_subdirectory(exe/FeatureExtraction)
+add_subdirectory(exe/GazeOnly)

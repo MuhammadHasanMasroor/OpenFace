@@ -93,6 +93,33 @@ IF(NOT OpenBLAS_LIB)
     MESSAGE(STATUS "Could not find OpenBLAS lib. Turning OpenBLAS_FOUND off")
 ENDIF()
 
+# Fallback: if OpenBLAS is not available, try linking against any system BLAS.
+# This is sufficient for OpenFace's Fortran BLAS symbol usage (e.g. sgemm_),
+# and we provide a weak openblas_set_num_threads shim for non-OpenBLAS BLASes.
+IF(NOT OpenBLAS_FOUND)
+    find_package(BLAS QUIET)
+    IF(BLAS_FOUND)
+        SET(OpenBLAS_FOUND ON)
+        SET(OpenBLAS_LIB "${BLAS_LIBRARIES}")
+        MESSAGE(STATUS "Falling back to system BLAS libraries: ${BLAS_LIBRARIES}")
+    ELSE()
+        # Some environments only ship the runtime BLAS (e.g. libblas.so.3) without
+        # the -dev symlink (libblas.so). Try locating the versioned runtime lib.
+        find_library(GENERIC_BLAS_LIB
+            NAMES blas libblas.so.3 blas.so.3
+            PATHS
+                /lib /usr/lib
+                /lib/x86_64-linux-gnu /usr/lib/x86_64-linux-gnu
+                /lib/aarch64-linux-gnu /usr/lib/aarch64-linux-gnu
+            NO_DEFAULT_PATH)
+        IF(GENERIC_BLAS_LIB)
+            SET(OpenBLAS_FOUND ON)
+            SET(OpenBLAS_LIB "${GENERIC_BLAS_LIB}")
+            MESSAGE(STATUS "Falling back to versioned BLAS runtime library: ${GENERIC_BLAS_LIB}")
+        ENDIF()
+    ENDIF()
+ENDIF()
+
 IF (OpenBLAS_FOUND)
   IF (NOT OpenBLAS_FIND_QUIETLY)
     MESSAGE(STATUS "Found OpenBLAS libraries: ${OpenBLAS_LIB}")

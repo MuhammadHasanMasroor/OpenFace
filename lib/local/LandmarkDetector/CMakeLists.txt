@@ -14,7 +14,8 @@ SET(SOURCE
 	src/LandmarkDetectorParameters.cpp
 	src/Patch_experts.cpp
 	src/PAW.cpp
-    src/PDM.cpp
+	src/PDM.cpp
+	src/OpenBLASCompat.cpp
 	src/SVR_patch_expert.cpp
 	src/stdafx.cpp
 )

@@ -1,50 +1,56 @@
-# OpenFace 2.2.0: a facial behavior analysis toolkit
+# OpenFace (GazeOnly fork)
 
-[![Build Status](https://travis-ci.org/TadasBaltrusaitis/OpenFace.svg?branch=master)](https://travis-ci.org/TadasBaltrusaitis/OpenFace)
-[![Build status](https://ci.appveyor.com/api/projects/status/8msiklxfbhlnsmxp/branch/master?svg=true)](https://ci.appveyor.com/project/TadasBaltrusaitis/openface/branch/master)
+This is a trimmed, gaze-only C++ fork of the OpenFace repository. It keeps only:
 
-Over the past few years, there has been an increased interest in automatic facial behavior analysis
-and understanding. We present OpenFace – a tool intended for computer vision and machine learning
-researchers, affective computing community and people interested in building interactive
-applications based on facial behavior analysis. OpenFace is the ﬁrst toolkit capable of facial
-landmark detection, head pose estimation, facial action unit recognition, and eye-gaze estimation
-with available source code for both running and training the models. The computer vision algorithms
-which represent the core of OpenFace demonstrate state-of-the-art results in all of the above
-mentioned tasks. Furthermore, our tool is capable of real-time performance and is able to run from a
-simple webcam without any specialist hardware.
+- Landmark tracking (`lib/local/LandmarkDetector`)
+- Gaze estimation (`lib/local/GazeAnalyser`)
+- Utilities (camera/video IO + visualization) (`lib/local/Utilities`)
+- A minimal executable that shows gaze in real time: `exe/GazeOnly` → `build/bin/GazeOnly`
 
-![Multicomp logo](https://github.com/TadasBaltrusaitis/OpenFace/blob/master/imgs/muticomp_logo_black.png)
+## What you get
 
-OpenFace was originally developed by Tadas Baltrušaitis in collaboration with CMU MultiComp Lab led by Prof. Louis-Philippe Morency. Some of the original algorithms were created while at Rainbow Group, Cambridge University. The OpenFace library is still actively developed at the CMU MultiComp Lab in collaboration with Tadas Baltršaitis. Special thanks to researcher who helped developing, implementing and testing the algorithms present in OpenFace: Amir Zadeh and Yao Chong Lim on work on the CE-CLM model and Erroll Wood for the gaze estimation work.
+- Webcam / video gaze angles (radians) and 3D gaze vectors relative to the camera
+- A realtime window with face landmarks + projected gaze rays (green)
 
-## WIKI
+Note: this is NOT “where on the screen you look”. For screen coordinates you need calibration (mapping gaze/head pose to screen points).
 
-**For instructions of how to install/compile/use the project please see [WIKI](https://github.com/TadasBaltrusaitis/OpenFace/wiki)**
+## Dependencies (Ubuntu / Debian)
 
-## Functionality
+Install:
 
-The system is capable of performing a number of facial analysis tasks:
+```bash
+sudo apt-get update
+sudo apt-get install -y \
+  build-essential cmake \
+  libopencv-dev libdlib-dev \
+  libopenblas-dev liblapack-dev
+```
 
-* Facial Landmark Detection
+## Build
 
-![Sample facial landmark detection image](https://github.com/TadasBaltrusaitis/OpenFace/blob/master/imgs/multi_face_img.png)
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --target GazeOnly -j
+```
 
-* Facial Landmark and head pose tracking (links to YouTube videos)
+## Run
 
-<a href="https://www.youtube.com/watch?v=V7rV0uy7heQ" target="_blank"><img src="http://img.youtube.com/vi/V7rV0uy7heQ/0.jpg" alt="Multiple Face Tracking" width="240" height="180" border="10" /></a>
-<a href="https://www.youtube.com/watch?v=vYOa8Pif5lY" target="_blank"><img src="http://img.youtube.com/vi/vYOa8Pif5lY/0.jpg" alt="Multiple Face Tracking" width="240" height="180" border="10" /></a>
+Webcam (press `q` to quit):
 
-* Facial Action Unit Recognition
+```bash
+./build/bin/GazeOnly -device 0 -mloc build/bin/model/main_clnf_general.txt -show
+```
 
-<img src="https://github.com/TadasBaltrusaitis/OpenFace/blob/master/imgs/au_sample.png" height="280" width="600" >
+Video:
 
-* Gaze tracking (image of it in action)
+```bash
+./build/bin/GazeOnly -f /path/to/video.mp4 -mloc build/bin/model/main_clnf_general.txt -show
+```
 
-<img src="https://github.com/TadasBaltrusaitis/OpenFace/blob/master/imgs/gaze_ex.png" height="182" width="600" >
+Try alternative CLNF models if tracking is unstable:
 
-* Facial Feature Extraction (aligned faces and HOG features)
-
-![Sample aligned face and HOG image](https://github.com/TadasBaltrusaitis/OpenFace/blob/master/imgs/appearance.png)
+- `build/bin/model/main_clnf_wild.txt`
+- `build/bin/model/main_clnf_multi_pie.txt`
 
 ## Citation
 
